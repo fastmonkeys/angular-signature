@@ -11,5 +11,11 @@
   "bugs": {
     "url": "https://github.com/fastmonkeys/angular-signature/issues"
   },
-  "homepage": "https://github.com/fastmonkeys/angular-signature#readme"
+  "homepage": "https://github.com/fastmonkeys/angular-signature#readme",
+  "devDependencies": {
+    "eslint": "^2.10.2",
+    "eslint-config-airbnb-base": "^3.0.1",
+    "eslint-config-xo-space": "^0.13.0",
+    "eslint-plugin-import": "^1.8.0"
+  }
 }

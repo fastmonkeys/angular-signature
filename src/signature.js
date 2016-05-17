@@ -9,11 +9,16 @@ angular.module('signature').directive('signaturePad', ['$window',
   function ($window) {
     'use strict';
 
-    var signaturePad, canvas, element, EMPTY_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
+    var EMPTY_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=';
+
     return {
       restrict: 'EA',
       replace: true,
-      template: '<div class="signature" ng-style="{height: height + \'px\', width: width + \'px\'}"><canvas ng-mouseup="updateModel()" style="width: 100%; height: 100%;"></canvas></div>',
+      template: (
+        '<div class="signature" ng-style="{height: height + \'px\', width: width + \'px\'}">' +
+        '<canvas ng-mouseup="updateModel()" style="width: 100%; height: 100%;"></canvas>' +
+        '</div>'
+      ),
       scope: {
         accept: '=',
         clear: '=',
@@ -57,7 +62,18 @@ angular.module('signature').directive('signaturePad', ['$window',
         }
       ],
       link: function (scope, element) {
-        canvas = element.find('canvas')[0];
+        var canvas = element.find('canvas')[0];
+        var onDevicePixelRatioChange = $window.matchMedia('(-webkit-device-pixel-ratio:1)');
+        var resizeCallback = scope.onResize.bind(this);
+
+        angular.element($window).bind('resize', resizeCallback);
+        onDevicePixelRatioChange.addListener(resizeCallback);
+
+        scope.$on('$destroy', function removeListeners() {
+          angular.element($window).unbind('resize', resizeCallback);
+          onDevicePixelRatioChange.removeListener(resizeCallback);
+        });
+
         scope.signaturePad = new SignaturePad(canvas);
 
         if (!scope.height) scope.height = 220;
@@ -68,11 +84,9 @@ angular.module('signature').directive('signaturePad', ['$window',
         }
 
         scope.onResize = function () {
-          var canvas = element.find('canvas')[0];
           var ratio = Math.max($window.devicePixelRatio || 1, 1);
           var ctx = canvas.getContext('2d');
 
-          $scope.signaturePad.toDataURL();
           if (
               canvas.width !== scope.width * ratio ||
               canvas.height !== scope.height * ratio
@@ -86,17 +100,6 @@ angular.module('signature').directive('signaturePad', ['$window',
         };
 
         scope.onResize();
-
-        var onDevicePixelRatioChange = $window.matchMedia('(-webkit-device-pixel-ratio:1)');
-        var resizeCallback = scope.onResize.bind(this);
-        angular.element($window).bind('resize', resizeCallback);
-        onDevicePixelRatioChange.addListener(resizeCallback);
-
-        scope.$on('$destroy', function removeListeners() {
-          angular.element($window).unbind('resize', resizeCallback);
-          onDevicePixelRatioChange.removeListener(resizeCallback);
-        });
-
       }
     };
   }
