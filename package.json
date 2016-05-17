@@ -1,0 +1,15 @@
+{
+  "name": "angular-signature",
+  "version": "1.0.0",
+  "description": "AngularJS directive for the [signature pad](https://github.com/szimek/signature_pad/) JavaScript library by szimek.",
+  "main": "src/signature.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fastmonkeys/angular-signature.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fastmonkeys/angular-signature/issues"
+  },
+  "homepage": "https://github.com/fastmonkeys/angular-signature#readme"
+}
