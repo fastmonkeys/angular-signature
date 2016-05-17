@@ -13,11 +13,11 @@ angular.module('signature').directive('signaturePad', ['$window',
     return {
       restrict: 'EA',
       replace: true,
-      template: '<div class="signature" ng-style="{height: height + \'px\', width: width + \'px\'}"><canvas height="{{ height }}" width="{{ width }}" ng-mouseup="updateModel()"></canvas></div>',
+      template: '<div class="signature" ng-style="{height: height + \'px\', width: width + \'px\'}"><canvas ng-mouseup="updateModel()" style="width: 100%; height: 100%;"></canvas></div>',
       scope: {
         accept: '=',
         clear: '=',
-        dataurl: '=',
+        dataurl: '=?',
         height: '@',
         width: '@'
       },
@@ -41,18 +41,19 @@ angular.module('signature').directive('signaturePad', ['$window',
           $scope.updateModel = function () {
             var result = $scope.accept();
             $scope.dataurl = result.isEmpty ? undefined : result.dataUrl;
-          }
+          };
 
           $scope.clear = function () {
             $scope.signaturePad.clear();
             $scope.dataurl = undefined;
           };
 
-          $scope.$watch("dataurl", function (dataUrl) {
+          $scope.$watch('dataurl', function (dataUrl) {
             if (dataUrl) {
               $scope.signaturePad.fromDataURL(dataUrl);
             }
           });
+          $scope.$watch(['width', 'height'], $scope.onResize);
         }
       ],
       link: function (scope, element) {
@@ -66,19 +67,36 @@ angular.module('signature').directive('signaturePad', ['$window',
           scope.signaturePad.fromDataURL(scope.signature.dataUrl);
         }
 
-        scope.onResize = function() {
+        scope.onResize = function () {
           var canvas = element.find('canvas')[0];
-          var ratio =  Math.max($window.devicePixelRatio || 1, 1);
-          canvas.width = canvas.offsetWidth * ratio;
-          canvas.height = canvas.offsetHeight * ratio;
-          canvas.getContext("2d").scale(ratio, ratio);
-        }
+          var ratio = Math.max($window.devicePixelRatio || 1, 1);
+          var ctx = canvas.getContext('2d');
+
+          $scope.signaturePad.toDataURL();
+          if (
+              canvas.width !== scope.width * ratio ||
+              canvas.height !== scope.height * ratio
+          ) {
+            canvas.width = scope.width * ratio;
+            canvas.height = scope.height * ratio;
+            scope.signaturePad.clear();
+          }
+          ctx.resetTransform();
+          ctx.scale(ratio, ratio);
+        };
 
         scope.onResize();
 
-        angular.element($window).bind('resize', function() {
-            scope.onResize();
+        var onDevicePixelRatioChange = $window.matchMedia('(-webkit-device-pixel-ratio:1)');
+        var resizeCallback = scope.onResize.bind(this);
+        angular.element($window).bind('resize', resizeCallback);
+        onDevicePixelRatioChange.addListener(resizeCallback);
+
+        scope.$on('$destroy', function removeListeners() {
+          angular.element($window).unbind('resize', resizeCallback);
+          onDevicePixelRatioChange.removeListener(resizeCallback);
         });
+
       }
     };
   }
