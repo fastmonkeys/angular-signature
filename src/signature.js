@@ -23,12 +23,17 @@ angular.module('signature').directive('signaturePad', ['$window', '$timeout',
         accept: '=',
         clear: '=',
         dataurl: '=?',
+        isEmpty: '=?',
         height: '@',
         width: '@'
       },
       controller: [
         '$scope',
         function ($scope) {
+          $scope.isEmpty = function () {
+            return $scope.signaturePad.isEmpty();
+          };
+
           $scope.accept = function () {
             var signature = {};
 
