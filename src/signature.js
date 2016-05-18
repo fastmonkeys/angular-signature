@@ -64,15 +64,6 @@ angular.module('signature').directive('signaturePad', ['$window',
       link: function (scope, element) {
         var canvas = element.find('canvas')[0];
         var onDevicePixelRatioChange = $window.matchMedia('(-webkit-device-pixel-ratio:1)');
-        var resizeCallback = scope.onResize.bind(this);
-
-        angular.element($window).bind('resize', resizeCallback);
-        onDevicePixelRatioChange.addListener(resizeCallback);
-
-        scope.$on('$destroy', function removeListeners() {
-          angular.element($window).unbind('resize', resizeCallback);
-          onDevicePixelRatioChange.removeListener(resizeCallback);
-        });
 
         scope.signaturePad = new SignaturePad(canvas);
 
@@ -100,6 +91,16 @@ angular.module('signature').directive('signaturePad', ['$window',
         };
 
         scope.onResize();
+
+        var resizeCallback = scope.onResize.bind(this);
+
+        angular.element($window).bind('resize', resizeCallback);
+        onDevicePixelRatioChange.addListener(resizeCallback);
+
+        scope.$on('$destroy', function removeListeners() {
+          angular.element($window).unbind('resize', resizeCallback);
+          onDevicePixelRatioChange.removeListener(resizeCallback);
+        });
       }
     };
   }
