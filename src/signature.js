@@ -58,11 +58,11 @@ angular.module('signature').directive('signaturePad', ['$window', '$timeout',
             $scope.dataurl = undefined;
           };
 
-          $scope.$watch('dataurl', function (newValue, oldValue) {
-            if (newValue && newValue !== oldValue) {
-              $scope.signaturePad.fromDataURL(newValue);
-            }
-          });
+          // $scope.$watch('dataurl', function (newValue, oldValue) {
+          //   if (newValue && newValue !== oldValue) {
+          //     $scope.signaturePad.fromDataURL(newValue);
+          //   }
+          // });
           $scope.$watch(['width', 'height'], $scope.onResize);
         }
       ],
