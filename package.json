@@ -12,6 +12,10 @@
     "url": "https://github.com/fastmonkeys/angular-signature/issues"
   },
   "homepage": "https://github.com/fastmonkeys/angular-signature#readme",
+  "dependencies": {
+    "angular": ">=1.3 <2.0",
+    "signature_pad": "~1.5.3"
+  },
   "devDependencies": {
     "eslint": "^2.10.2",
     "eslint-config-airbnb-base": "^3.0.1",
