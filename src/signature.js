@@ -25,7 +25,9 @@ angular.module('signature').directive('signaturePad', ['$window', '$timeout',
         dataurl: '=?',
         isEmpty: '=?',
         height: '@',
-        width: '@'
+        width: '@',
+        minWidth: '@',
+        maxWidth: '@',
       },
       controller: [
         '$scope',
@@ -53,39 +55,27 @@ angular.module('signature').directive('signaturePad', ['$window', '$timeout',
             $scope.dataurl = result.isEmpty ? undefined : result.dataUrl;
           };
 
+          $scope.clear = function () {
+            $scope.signaturePad.clear();
+            $scope.dataurl = undefined;
+          }
+
           $scope.$watch(['width', 'height'], $scope.onResize);
         }
       ],
       link: function (scope, element) {
         var canvas = element.find('canvas')[0];
-        var parent = element;
-        var onDevicePixelRatioChange = $window.matchMedia('(-webkit-device-pixel-ratio:1)');
-
-        scope.signaturePad = new SignaturePad(canvas);
+        var ratio = Math.max($window.devicePixelRatio || 1, 1);
+        scope.signaturePad = new SignaturePad(canvas, {
+          minWidth: (scope.minWidth || 0.5) * ratio,
+          maxWidth: (scope.maxWidth || 2.5) * ratio
+        });
 
         if (scope.signature && !scope.signature.$isEmpty && scope.signature.dataUrl) {
           scope.signaturePad.fromDataURL(scope.signature.dataUrl);
         }
 
-        function updateScale() {
-          var ctx = canvas.getContext('2d');
-          var scaleWidth = canvas.width / parent[0].offsetWidth;
-          var scaleHeight = canvas.height / parent[0].offsetHeight;
-
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.scale(scaleWidth, scaleHeight);
-        }
-
-        scope.clear = function() {
-          var ctx = canvas.getContext('2d');
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          scope.signaturePad.clear();
-          scope.dataurl = undefined;
-          updateScale();
-        }
-
         scope.onResize = function () {
-          var ratio = Math.max($window.devicePixelRatio || 1, 1);
           var newWidth = Math.round(scope.width * ratio);
           var newHeight = Math.round(scope.height * ratio);
 
@@ -94,20 +84,9 @@ angular.module('signature').directive('signaturePad', ['$window', '$timeout',
             canvas.height = newHeight;
             scope.signaturePad.clear();
           }
-          updateScale();
         };
 
-        $timeout(scope.onResize);
-
-        var resizeCallback = scope.onResize.bind(this);
-
-        angular.element($window).bind('resize', resizeCallback);
-        onDevicePixelRatioChange.addListener(resizeCallback);
-
-        scope.$on('$destroy', function removeListeners() {
-          angular.element($window).unbind('resize', resizeCallback);
-          onDevicePixelRatioChange.removeListener(resizeCallback);
-        });
+        scope.onResize();
       }
     };
   }
